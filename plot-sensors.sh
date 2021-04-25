@@ -12,7 +12,7 @@ sense() {
 
 plot=$(mktemp -u)
 mkfifo "$plot"
-gnuplot -p "$plot" & plotpid=$!
+gnuplot "$plot" & plotpid=$!
 
 exec > "$plot"
 
@@ -35,5 +35,11 @@ done | awk 'NR==1 { printf "plot " }
 	NR!=1 { printf ", \\\n\t" }
 	{ printf "%s", $0 }
 	END { printf "\n" }'
+
+while :; do
+	sense && echo replot & pid=$!
+	sleep 1
+	wait $pid
+done
 
 wait "$plotpid"
